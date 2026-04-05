@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FURUGIL — AI古着鑑定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+JP:wght@300;400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F5F0E8; --cream-dark: #EDE5D4; --espresso: #1A1008;
+    --brown: #3D2B1F; --brown-mid: #6B4C37; --gold: #B8922A;
+    --gold-light: #D4AF6A; --warm-gray: #8C7B6E;
+    --serif: 'Playfair Display', 'Noto Serif JP', serif;
+    --body: 'Cormorant Garamond', 'Noto Serif JP', serif;
+    --mono: 'DM Mono', monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--cream); color: var(--espresso); font-family: var(--body); font-size: 18px; line-height: 1.7; overflow-x: hidden; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 3rem; background: rgba(245,240,232,0.92); backdrop-filter: blur(12px); border-bottom: 0.5px solid rgba(61,43,31,0.15); }
+  .nav-logo { font-family: var(--serif); font-size: 1.4rem; font-weight: 700; letter-spacing: 0.18em; color: var(--espresso); text-decoration: none; }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--brown-mid); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+  .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 0 3rem; padding-top: 80px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 55%; height: 100%; background: var(--espresso); z-index: 0; }
+  .hero-text { position: relative; z-index: 1; padding-right: 3rem; }
+  .hero-eyebrow { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .hero-eyebrow::before { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--gold); }
+  h1 { font-family: var(--serif); font-size: clamp(3rem, 5vw, 5.5rem); line-height: 1.05; font-weight: 700; margin-bottom: 1.5rem; color: var(--espresso); }
+  h1 em { font-style: italic; color: var(--gold); }
+  .hero-desc { font-size: 1.05rem; color: var(--brown-mid); max-width: 420px; margin-bottom: 2.5rem; font-weight: 300; }
+  .btn-primary { display: inline-block; background: var(--espresso); color: var(--cream); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; padding: 1rem 2.2rem; border: none; cursor: pointer; transition: background 0.25s, transform 0.15s; }
+  .btn-primary:hover { background: var(--brown); transform: translateY(-1px); }
+  .hero-image-wrap { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; padding-left: 3rem; height: 100vh; }
+  .hero-card { background: rgba(245,240,232,0.06); border: 0.5px solid rgba(212,175,106,0.3); padding: 2rem; color: var(--cream); width: 100%; max-width: 420px; }
+  .hero-card-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 1rem; }
+  .hero-stat { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+  .stat-item { border-left: 1px solid rgba(212,175,106,0.3); padding-left: 1rem; }
+  .stat-num { font-family: var(--serif); font-size: 2rem; font-weight: 700; color: var(--gold-light); line-height: 1; }
+  .stat-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; color: rgba(245,240,232,0.5); text-transform: uppercase; margin-top: 0.25rem; }
+  .section { padding: 6rem 3rem; }
+  .section-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem; }
+  .section-label::before { content: ''; width: 24px; height: 1px; background: var(--gold); display: inline-block; }
+  h2 { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 700; line-height: 1.15; margin-bottom: 1rem; color: var(--espresso); }
+  h2 em { font-style: italic; color: var(--gold); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 3rem; }
+  .step { background: var(--cream-dark); padding: 2.5rem 2rem; }
+  .step-num { font-family: var(--serif); font-size: 4rem; font-weight: 700; color: rgba(61,43,31,0.1); line-height: 1; margin-bottom: 1rem; }
+  .step h3 { font-family: var(--serif); font-size: 1.3rem; font-weight: 400; margin-bottom: 0.75rem; color: var(--espresso); }
+  .step p { font-size: 0.9rem; color: var(--warm-gray); font-weight: 300; }
+  #appraisal { background: var(--espresso); }
+  #appraisal .section-label { color: var(--gold-light); }
+  #appraisal .section-label::before { background: var(--gold-light); }
+  #appraisal h2 { color: var(--cream); }
+  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2.5rem; }
+  .upload-panel { background: rgba(245,240,232,0.04); border: 1px dashed rgba(212,175,106,0.25); padding: 2.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 480px; cursor: pointer; transition: background 0.2s, border-color 0.2s; position: relative; overflow: hidden; }
+  .upload-panel:hover, .upload-panel.drag { background: rgba(184,146,42,0.07); border-color: rgba(212,175,106,0.5); }
+  .upload-panel input { display: none; }
+  .upload-icon { width: 52px; height: 52px; border: 1px solid rgba(212,175,106,0.4); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+  .upload-icon svg { stroke: var(--gold-light); }
+  .upload-title { font-family: var(--serif); font-size: 1.1rem; color: var(--cream); margin-bottom: 0.4rem; }
+  .upload-sub { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em; color: rgba(245,240,232,0.35); text-transform: uppercase; }
+  #imgPreview { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; display: none; }
+  #changeLabel { position: absolute; bottom: 1rem; right: 1rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-light); background: rgba(26,16,8,0.8); padding: 6px 12px; cursor: pointer; display: none; z-index: 2; }
+  .result-panel { background: rgba(245,240,232,0.04); padding: 2.5rem; min-height: 480px; display: flex; flex-direction: column; }
+  .result-header { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(212,175,106,0.6); margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 0.5px solid rgba(245,240,232,0.08); display: flex; justify-content: space-between; }
+  .result-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(245,240,232,0.15); text-align: center; }
+  .result-placeholder p { font-size: 0.85rem; margin-top: 0.75rem; }
+  .result-content { display: none; flex-direction: column; gap: 1.25rem; flex: 1; }
+  .result-row { display: flex; justify-content: space-between; padding-bottom: 1rem; border-bottom: 0.5px solid rgba(245,240,232,0.06); }
+  .result-key { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,240,232,0.4); padding-top: 2px; min-width: 110px; }
+  .result-val { font-family: var(--body); font-size: 0.95rem; color: var(--cream); text-align: right; font-weight: 300; max-width: 60%; }
+  .price-val { font-family: var(--serif); font-size: 1.5rem; color: var(--gold-light); font-weight: 700; }
+  .grade-badge { display: inline-block; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; padding: 4px 14px; border: 1px solid; }
+  .grade-S { border-color: var(--gold-light); color: var(--gold-light); }
+  .grade-A { border-color: #A8D5BA; color: #A8D5BA; }
+  .grade-B { border-color: #7BACCD; color: #7BACCD; }
+  .grade-C { border-color: var(--warm-gray); color: var(--warm-gray); }
+  .tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  .vtag { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; padding: 3px 10px; border: 0.5px solid rgba(212,175,106,0.3); color: rgba(212,175,106,0.7); text-transform: uppercase; }
+  .desc-text { font-size: 0.88rem; color: rgba(245,240,232,0.65); line-height: 1.8; font-weight: 300; padding: 0.75rem 0; }
+  .analyze-btn { display: block; width: 100%; background: var(--gold); color: var(--espresso); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 1.1rem; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s; margin-top: 1.5rem; }
+  .analyze-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); }
+  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .spinner { width: 14px; height: 14px; border: 1.5px solid rgba(26,16,8,0.3); border-top-color: var(--espresso); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .features { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; margin-top: 3rem; }
+  .feat { background: var(--cream-dark); padding: 2rem 1.5rem; }
+  .feat-icon { width: 36px; height: 36px; border: 1px solid var(--brown-mid); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+  .feat-icon svg { stroke: var(--brown-mid); width: 18px; height: 18px; }
+  .feat h3 { font-family: var(--serif); font-size: 1rem; font-weight: 400; margin-bottom: 0.5rem; color: var(--espresso); }
+  .feat p { font-size: 0.8rem; color: var(--warm-gray); font-weight: 300; }
+  footer { background: var(--espresso); padding: 3rem; display: flex; align-items: center; justify-content: space-between; }
+  .footer-logo { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; color: var(--cream); letter-spacing: 0.15em; }
+  .footer-logo span { color: var(--gold); }
+  .footer-copy { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; color: rgba(245,240,232,0.25); text-transform: uppercase; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+  .anim { animation: fadeUp 0.8s ease both; }
+  .anim-d1 { animation-delay: 0.1s; } .anim-d2 { animation-delay: 0.25s; } .anim-d3 { animation-delay: 0.4s; } .anim-d4 { animation-delay: 0.55s; }
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; } .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 5rem 1.5rem 3rem; } .hero::before { display: none; }
+    .hero-image-wrap { padding-left: 0; height: auto; margin-top: 2rem; } .hero-card { background: var(--espresso); }
+    .section { padding: 4rem 1.5rem; }
+    .steps, .features { grid-template-columns: 1fr; }
+    .tool-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">FURU<span>GIL</span></a>
+  <ul class="nav-links">
+    <li><a href="#how">使い方</a></li>
+    <li><a href="#appraisal">鑑定する</a></li>
+    <li><a href="#features">特徴</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-text">
+    <p class="hero-eyebrow anim anim-d1">AI Vintage Appraisal</p>
+    <h1 class="anim anim-d2">あなたの古着、<br>本当の<em>価値</em>を<br>知っていますか。</h1>
+    <p class="hero-desc anim anim-d3">写真一枚から、ブランド・年代・コンディション・相場価格まで。AIが本格的な古着鑑定をお届けします。</p>
+    <a href="#appraisal" class="btn-primary anim anim-d4">無料で鑑定する</a>
+  </div>
+  <div class="hero-image-wrap">
+    <div class="hero-card anim anim-d3">
+      <p class="hero-card-label">鑑定例</p>
+      <div style="font-family:var(--serif);font-size:1.3rem;color:var(--cream);line-height:1.4;">Levi's 501 — 1980年代<br>デッドストック</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;color:rgba(212,175,106,0.6);margin-top:0.5rem;text-transform:uppercase;">グレード S &nbsp;|&nbsp; 推定 ¥28,000〜¥35,000</div>
+      <div class="hero-stat">
+        <div class="stat-item"><div class="stat-num">無料</div><div class="stat-label">完全無料</div></div>
+        <div class="stat-item"><div class="stat-num">3秒</div><div class="stat-label">鑑定時間</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <p class="section-label">How it works</p>
+  <h2>たった3ステップで<br><em>プロ級</em>の鑑定結果</h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><h3>写真を撮る</h3><p>アイテム全体・タグ・ディテールなど複数アングルから撮影するとより精度が上がります。</p></div>
+    <div class="step"><div class="step-num">02</div><h3>AIが解析</h3><p>最新のビジョンAIがブランド・素材・縫製・年代の特徴を瞬時に読み取ります。</p></div>
+    <div class="step"><div class="step-num">03</div><h3>結果を受け取る</h3><p>ブランド名・年代・コンディション・推定市場価格を含む詳細レポートを取得できます。</p></div>
+  </div>
+</section>
+
+<section class="section" id="appraisal">
+  <p class="section-label">AI Appraisal Tool</p>
+  <h2>古着を<em>鑑定</em>する</h2>
+  <div class="tool-grid">
+    <div class="upload-panel" id="dropZone" onclick="triggerUpload()">
+      <img id="imgPreview" alt="preview">
+      <div class="upload-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <p class="upload-title">写真をアップロード</p>
+      <p class="upload-sub">クリックまたはドラッグ &amp; ドロップ</p>
+      <input type="file" id="fileInput" accept="image/*">
+      <span id="changeLabel" onclick="event.stopPropagation(); triggerUpload()">写真を変更</span>
+    </div>
+    <div class="result-panel">
+      <div class="result-header"><span>鑑定レポート</span><span id="statusLabel">— 待機中</span></div>
+      <div class="result-placeholder" id="placeholder">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <p>写真をアップロードすると<br>鑑定結果が表示されます</p>
+      </div>
+      <div class="result-content" id="resultContent">
+        <div class="result-row"><span class="result-key">ブランド</span><span class="result-val" id="r-brand">—</span></div>
+        <div class="result-row"><span class="result-key">アイテム</span><span class="result-val" id="r-item">—</span></div>
+        <div class="result-row"><span class="result-key">推定年代</span><span class="result-val" id="r-era">—</span></div>
+        <div class="result-row"><span class="result-key">コンディション</span><span class="result-val" id="r-cond">—</span></div>
+        <div class="result-row"><span class="result-key">グレード</span><span class="result-val" id="r-grade">—</span></div>
+        <div class="result-row"><span class="result-key">推定市場価格</span><span class="result-val price-val" id="r-price">—</span></div>
+        <div class="result-row" style="border-bottom:none;"><span class="result-key">特徴タグ</span><div class="tags-wrap" id="r-tags"></div></div>
+        <div class="desc-text" id="r-desc"></div>
+      </div>
+      <button class="analyze-btn" id="analyzeBtn" disabled onclick="analyze()">写真をアップロードして鑑定開始</button>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <p class="section-label">Features</p>
+  <h2>なぜ FURUGILが<em>選ばれる</em>のか</h2>
+  <div class="features">
+    <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div><h3>ブランド判定</h3><p>タグや縫製のディテールから国内外1000以上のブランドを識別します。</p></div>
+    <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3>年代推定</h3><p>縫製技術・タグデザイン・シルエットから製造年代を推定します。</p></div>
+    <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><h3>価格査定</h3><p>現在の古着市場データをもとに適正な売買価格の目安を提示します。</p></div>
+    <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>真贋チェック</h3><p>ロゴ・刺繍・縫製の特徴からコピー品の疑いがないか確認します。</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">FURU<span>GIL</span></div>
+  <p class="footer-copy">© 2025 Furugil · Powered by Hugging Face AI</p>
+</footer>
+
+<script>
+// ================================================================
+// ★ あなただけが触る場所 ★
+// Hugging Face のトークンをここに貼り付けてください
+const HF_TOKEN = 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;
+// ================================================================
+
+const HF_MODEL = 'meta-llama/Llama-3.2-11B-Vision-Instruct';
+const PROMPT = `あなたは古着・ヴィンテージ衣料専門の鑑定士AIです。
+画像の古着を分析し、以下のJSON形式のみで回答してください（他テキスト不要）。
+衣類が写っていない場合は {"error": "衣類が検出できませんでした"} のみ返してください。
+
+{"brand":"ブランド名","item":"アイテム名","era":"推定年代","condition":"コンディション","grade":"S/A/B/Cのどれか","price_low":数値,"price_high":数値,"tags":["タグ1","タグ2","タグ3"],"description":"鑑定コメント2〜3文（日本語）","authenticity":"真贋コメント（問題なければ特に問題なし）"}`;
+
+let imgBase64 = null, imgType = null;
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const imgPreview = document.getElementById('imgPreview');
+const changeLabel = document.getElementById('changeLabel');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const placeholder = document.getElementById('placeholder');
+const resultContent = document.getElementById('resultContent');
+const statusLabel = document.getElementById('statusLabel');
+
+function triggerUpload() { fileInput.click(); }
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+function loadFile(file) {
+  imgType = file.type;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imgBase64 = e.target.result.split(',')[1];
+    imgPreview.src = e.target.result;
+    imgPreview.style.display = 'block';
+    changeLabel.style.display = 'block';
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = '鑑定を開始する';
+    placeholder.style.display = 'none';
+    resultContent.style.display = 'none';
+    statusLabel.textContent = '— 準備完了';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyze() {
+  if (!imgBase64) return;
+  analyzeBtn.disabled = true;
+  analyzeBtn.innerHTML = '<span class="spinner"></span>AIが鑑定中...';
+  statusLabel.textContent = '— 解析中（少々お待ちください）';
+  placeholder.style.display = 'none';
+  resultContent.style.display = 'none';
+
+  try {
+    const res = await fetch(
+      `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${HF_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: HF_MODEL,
+          messages: [{ role: 'user', content: [
+            { type: 'image_url', image_url: { url: `data:${imgType};base64,${imgBase64}` } },
+            { type: 'text', text: PROMPT }
+          ]}],
+          max_tokens: 800,
+          temperature: 0.2
+        })
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 503 || (err.error || '').includes('loading')) {
+        showError('AIモデルを起動中です。1〜2分後にもう一度お試しください。');
+      } else {
+        showError('エラーが発生しました。もう一度お試しください。');
+      }
+      return;
+    }
+
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content || '';
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) { showError('結果を解析できませんでした。もう一度お試しください。'); return; }
+    const r = JSON.parse(jsonMatch[0]);
+    if (r.error) { showError(r.error); return; }
+
+    document.getElementById('r-brand').textContent = r.brand || '—';
+    document.getElementById('r-item').textContent = r.item || '—';
+    document.getElementById('r-era').textContent = r.era || '—';
+    document.getElementById('r-cond').textContent = r.condition || '—';
+    const grade = r.grade || 'C';
+    document.getElementById('r-grade').innerHTML = `<span class="grade-badge grade-${grade}">${grade}</span>`;
+    if (r.price_low && r.price_high) {
+      document.getElementById('r-price').textContent = `¥${Number(r.price_low).toLocaleString()} 〜 ¥${Number(r.price_high).toLocaleString()}`;
+    }
+    const tagsWrap = document.getElementById('r-tags');
+    tagsWrap.innerHTML = '';
+    (r.tags || []).forEach(t => { const s = document.createElement('span'); s.className = 'vtag'; s.textContent = t; tagsWrap.appendChild(s); });
+    let desc = r.description || '';
+    if (r.authenticity && r.authenticity !== '特に問題なし') desc += `\n\n⚠ 真贋チェック: ${r.authenticity}`;
+    document.getElementById('r-desc').textContent = desc;
+    resultContent.style.display = 'flex';
+    statusLabel.textContent = '— 鑑定完了';
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = 'もう一度鑑定する';
+  } catch(err) {
+    showError('接続エラーが発生しました。ネットワークを確認してください。');
+  }
+}
+
+function showError(msg) {
+  statusLabel.textContent = '— エラー';
+  placeholder.innerHTML = `<p style="color:rgba(212,175,106,0.8);font-size:0.9rem;padding:1rem;">${msg}</p>`;
+  placeholder.style.display = 'flex';
+  analyzeBtn.disabled = false;
+  analyzeBtn.textContent = 'もう一度鑑定する';
+}
+</script>
+</body>
+</html>
